@@ -43,3 +43,5 @@ class Card:
 
     def is_special(self):
         return self._value >= 11
+
+# linkejimai
