@@ -2,25 +2,25 @@ import random
 
 class Suit:
 
-    SYMBOLS = {"clubs":"♣", "diamonds":"♦", "hearts":"♥", "spades":"♠"} #dict. with keys and symbols
+    SYMBOLS = {"clubs": "♣", "diamonds": "♦", "hearts": "♥", "spades": "♠"}
 
-    def __init__(self, description): #creates a object with description and symbols 
+    def __init__(self, description):
         self._description = description
-        self._symbol = Suit.SYMBOLS[description.lower()] #Suit. - name of class. symbols key of description 
+        self._symbol = Suit.SYMBOLS[description.lower()]
 
-    @property #getters becouse those cant be modified outside the class 
+    @property
     def description(self):
-        return self._description #_means that it can be used only inside tha class
-    
+        return self._description
+
     @property
     def symbol(self):
         return self._symbol
 
 class Card:
 
-    special_cards = {11: "Jack", 12: "Queen", 13: "King", 14:"Ace"}
+    special_cards = {11: "Jack", 12: "Queen", 13: "King", 14: "Ace"}
 
-    def __init__(self, suit, value): #if those values wanted to be used outside of class, getters should be used as below. 
+    def __init__(self, suit, value):
         self._suit = suit
         self._value = value
 
@@ -34,7 +34,7 @@ class Card:
     
     def show(self):
         card_value = self._value
-        card_suit = self._suit._description.capitalize()
+        card_suit = self._suit.description.capitalize()
         suit_symbol = self._suit.symbol
 
         if self.is_special():
@@ -51,17 +51,17 @@ class Deck:
     SUITS = ("clubs", "diamonds", "hearts", "spades")
 
     def __init__(self, is_empty=False): 
-        self._cards = [] #empty list of cards
+        self._cards = []
 
         if not is_empty:
-            self.build() #creates a deck using def build
+            self.build()
 
     @property
     def size(self):
         return len(self._cards)
     
     def build(self):
-        for suit in Deck.SUITS: # 4 x 14 (4 suits, 14 card values)
+        for suit in Deck.SUITS:
             for value in range(2, 15):
                 self._cards.append(Card(Suit(suit), value))
     
@@ -74,8 +74,8 @@ class Deck:
 
     def draw(self):
         if self._cards:
-            return self._cards.pop() #returns last card from the list .pop takes last argument from the list
-        else: 
+            return self._cards.pop()
+        else:
             return None
         
     def add(self, card):
@@ -126,17 +126,20 @@ class Game:
         self.make_deck(self._player)
         self.make_deck(self._computer)
 
-    def make_deck(self, character): #character - player or computer
-        for i in range(26):
+    def make_deck(self, character):
+        for _ in range(26):
             card = self._deck.draw()
             character.add_card(card)
     
     def start_battle(self, cards_from_war=None):
 
-        print("\n== Let`s Start the Battle ==\n")
+        print("\n== Let's Start the Battle ==\n")
 
         player_card = self._player.draw_card()
         computer_card = self._computer.draw_card()
+
+        if player_card is None or computer_card is None:
+            return None
 
         print(f"Your Card: ")
         player_card.show()
@@ -150,11 +153,11 @@ class Game:
         if winner == Game.PLAYER:
             print("\nYou won this round!")
             self.add_cards_to_character(self._player, cards_won)
-        elif winner == Game. COMPUTER:
+        elif winner == Game.COMPUTER:
             print("\nComputer won this round...")
             self.add_cards_to_character(self._computer, cards_won)
         else:
-            print("\nIt`s a tie. War starts!")
+            print("\nIt's a tie. War starts!")
             self.start_war(cards_won)
 
         return winner
@@ -181,13 +184,14 @@ class Game:
         player_cards = []
         computer_cards = []
 
-        for i in range(3):
-            player_cards = self._player.draw_card()
-            player_cards.append()
-
+        for _ in range(3):
+            player_card = self._player.draw_card()
+            if player_card:
+                player_cards.append(player_card)
 
             computer_card = self._computer.draw_card()
-            computer_cards.append()
+            if computer_card:
+                computer_cards.append(computer_card)
 
         print("Six hidden cards: XXX XXX")
 
@@ -211,7 +215,7 @@ class Game:
         
     def print_stats(self):
         print("\n----")
-        print(f"You have {self._player.deck.size} cards on your deck.")
+        print(f"You have {self._player.deck.size} cards in your deck.")
         print(f"The computer has {self._computer.deck.size} cards in its deck.")
         print("----")
 
@@ -220,21 +224,23 @@ class Game:
         print("    War Card Game    ")
         print("=====================")
 
+def main():
+    player = Player("Dude", Deck(is_empty=True))
+    computer = Player("Computer", Deck(is_empty=True), is_computer=True)
+    deck = Deck()
 
-player = Player("Dude", Deck(is_empty=True))
-computer = Player("Computer", Deck(is_empty=True), is_computer=True)
-deck = Deck()
+    game = Game(player, computer, deck)
 
-game = Game(player, computer, deck)
+    game.print_welcome_message()
 
-game.print_welcome_message()
+    while not game.check_game_over():
+        game.start_battle()
+        game.print_stats()
 
-while not game.check_game_over():
-    game.start_battle()
-    game.print_stats()
+        answer = input("\nAre you ready for the next round?\nPress Enter to continue.\nPress X to stop: ")
 
-    answer = input("\nAre you ready for next round?\nPress Enter to continue.\nPress X to stop")
+        if answer.lower() == "x":
+            break
 
-    if answer.lower() == "x":
-        break
-
+if __name__ == "__main__":
+    main()
